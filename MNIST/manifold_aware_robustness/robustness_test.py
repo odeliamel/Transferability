@@ -15,7 +15,7 @@ def test_robustness(greedy_attack1, projection_functions):
     batch_size = 100
     test_loader = dataset.MNIST.getTestSetIterator(batch_size=batch_size)
 
-    sample_size = 200
+    sample_size = 100
     # sample_size = len(test_loader.dataset)
     print(len(test_loader.dataset))
 
@@ -34,6 +34,7 @@ def test_robustness(greedy_attack1, projection_functions):
         # print(trained_model(data).data)
         # print(batch_idx, batch_size, sample_size)
         for projection_function in projection_functions:
+            print(projection_function.__name__)
             avg_distances1[projection_function.__name__][batch_idx * batch_size:(batch_idx+1) * batch_size], \
             successful_attacks1[projection_function.__name__][batch_idx * batch_size:(batch_idx+1) * batch_size] = \
                 greedy_attack1.get_distance_to_boundary(data, target, project=projection_function)

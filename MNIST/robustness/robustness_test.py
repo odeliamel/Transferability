@@ -76,8 +76,8 @@ def main():
             m = Classifier(model_name="shafi adv train dim "+str(d), model=m, dataset=MNIST)
             models.append(m)
 
-    # generate_benchmark(attacks, models)
-    generate_cross_benchmark(attacks, models, models[0])
+    generate_benchmark(attacks, models)
+    # generate_cross_benchmark(attacks, models, models[0])
 
 if __name__ == '__main__':
     main()

@@ -28,12 +28,40 @@ from classifiers.MNIST import model
 def exp12():
     model1 = MLP1Classifier()
     model2 = MLP1Classifier()
-    model3 = MLPnPCAClassifier(num_of_dims=30).cuda()
+    model3 = MLPnPCAClassifier(num_of_dims=50).cuda()
+
+    def project_diff_on_global_basis(x):
+        basis1 = model3.pca.V[:, :model3.pca.k].T
+        print(basis1.shape)
+        basis1 = create_orthonormal_basis(basis1)
+        return projectionTools.project_diff_on_basis(basis1, x)
+
+    def project_diff_off_global_basis(x):
+        global_basis = torch.eye(784).cuda()
+        global_basis[:model3.pca.k, :] = model3.pca.V.T[:model3.pca.k, :]
+        global_basis = create_orthonormal_basis(global_basis)
+        global_basis[:model3.pca.k, :] = 0
+        return projectionTools.project_diff_on_basis(global_basis, x)
 
     model1.load_state_dict(
-        torch.load("/home/odeliam/PycharmProjects/Transferability/MNIST/log/fc1/robust-dropout/best-35.pth"))
+        torch.load("/home/odeliam/PycharmProjects/Transferability/MNIST/log/fc1_new/mnist_clean/best-105.pth"))
     model2.load_state_dict(
-        torch.load("/home/odeliam/PycharmProjects/Transferability/MNIST/log/fc1/robust-wd0.5_advtrain1.5_step0.001/best-0.pth"))
+        torch.load(
+            "/home/odeliam/PycharmProjects/Transferability/MNIST/log/fc1_new/mnist_clean/best-105.pth"))
+
+    # model2.load_state_dict(
+    #     torch.load("/home/odeliam/PycharmProjects/Transferability/MNIST/log/fc1_new/projected/shafi_advtrain_testand1train_projected_pca32q_sameinit_100/best-1910.pth"))
+
+    x = model2.fc1.weight.clone().detach()
+    for i in range(256):
+        x[i] = project_diff_on_global_basis(model2.fc1.weight[i])
+
+    model2.fc1.weight = torch.nn.Parameter(x)
+    # for name, parameter in model2.named_parameters():
+    #     # print("bbbbbb", parameter)
+    #     if "weight" in name:
+    #         print("blablabla", name, parameter.shape)
+    #         parameter[0] = project_diff_on_global_basis(parameter[0])
 
     model1, model2 = model1.eval(), model2.eval()
     model1, model2 = model1.cuda(), model2.cuda()
@@ -84,18 +112,7 @@ def exp12():
         if torch.norm(adv1_diff, p=2) == 0:
             continue
 
-        def project_diff_on_global_basis(x):
-            basis1 = model3.pca.V[:, :model3.pca.k].T
-            print(basis1.shape)
-            basis1 = create_orthonormal_basis(basis1)
-            return projectionTools.project_diff_on_basis(basis1, x)
 
-        def project_diff_off_global_basis(x):
-            global_basis = torch.eye(784).cuda()
-            global_basis[:model3.pca.k, :] = model3.pca.V.T[:model3.pca.k, :]
-            global_basis = create_orthonormal_basis(global_basis)
-            global_basis[:model3.pca.k, :] = 0
-            return projectionTools.project_diff_on_basis(global_basis, x)
 
         def project_diff_on_local_on_global_basis(x):
             local_basis = torch.zeros((784, 784), dtype=torch.float).cuda()

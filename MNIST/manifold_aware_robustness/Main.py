@@ -23,7 +23,8 @@ from highDimSynthetic.sphere.CreateData import create_data
 from MNIST.manifold_aware_robustness.CreateModel import create_model
 from highDimSynthetic.sphere.utils import *
 from highDimSynthetic.sphere.AdvPert import *
-from MNIST.manifold_aware_robustness.projections import project_diff_on_global_basis, project_diff_off_global_basis
+from MNIST.manifold_aware_robustness.projections import project_diff_on_global_basis, project_diff_off_global_basis, \
+    project_diff_on_local_on_global_basis, project_diff_on_global_off_local_basis
 
 from torch.utils.data import DataLoader
 from torch.optim import SGD, lr_scheduler
@@ -46,14 +47,19 @@ def main():
 
     def identity(x, y):
         return x
-    all_projections = [identity, project_diff_on_global_basis, project_diff_off_global_basis]
+    all_projections = [identity, project_diff_on_global_basis, project_diff_off_global_basis,
+                       project_diff_on_local_on_global_basis, project_diff_on_global_off_local_basis]
     # factors = list(range(1, 100, 15))
-    factors = [0.2, 0.5] + list(range(1, 8, 2))
+    # factors = [0.2, 0.5] + list(range(1, 8, 2))
+    retries = 1
+    factors = [1]
     # factors = [5]
     # distances = {"identity": [], "project_diff_on_global_basis": [], "project_diff_off_global_basis": []}
-    distances = {"identity": torch.zeros([len(factors), 5]), "project_diff_on_global_basis": torch.zeros([len(factors), 5]), "project_diff_off_global_basis": torch.zeros([len(factors), 5])}
+    distances = {}
+    for p in all_projections:
+        distances[p.__name__] = torch.zeros([len(factors), retries])
 
-    for j in range(5):
+    for j in range(retries):
         for f in range(len(factors)):
             factor = factors[f]
             print(factor)
@@ -83,6 +89,8 @@ def main():
                 d = robustness_test.test_robustness(greedy_attack, all_projections)
                 for key in distances.keys():
                     distances[key][f, j] = torch.mean(d[key]).item()
+                print(distances)
+
         # return
     print(distances)
     import matplotlib.pyplot as plt

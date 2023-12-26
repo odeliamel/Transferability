@@ -45,7 +45,7 @@ def perturb_iterative(xvar, yvar, predict, project, nb_iter, eps, eps_iter, loss
         # print(preds, yvar, minimize)
         # print(torch.norm(delta.data, p=2, dim=-1))
         left_to_go = to_improve.clone().float().sum()
-        # print(ii, "to improve", left_to_go, project.__name__)
+        print(ii, "to improve", left_to_go, project.__name__)
         if to_improve.sum() == 0:
             # print("to improve", to_improve, project.__name__)
             break

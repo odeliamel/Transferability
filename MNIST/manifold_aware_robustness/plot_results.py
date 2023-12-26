@@ -36,8 +36,11 @@ s = """{'identity': [[1.6269, 1.6081, 1.6986, 1.6556, 1.6633],
 
 
 distances = eval(s)
-factors = [0.5] + list(range(1, 8, 2))
+# factors = [0.5] + list(range(1, 8, 2))
+factors = [0.5] + list(range(1, 6, 2))
 # factors = [0.2, 0.5] + list(range(1, 8, 2))
+# factors = [0.2, 0.5] + list(range(1, 6, 2))
+
 from statistics import mean
 import matplotlib.pyplot as plt
 import numpy as np
@@ -67,10 +70,16 @@ for key in distances.keys():
     i += 1
 plt.legend(fontsize=14)
 # plt.xticks([0.2, 0.5] + list(np.arange(1, 8, step=1)))
-plt.xticks([0.5] + list(np.arange(1, 8, step=1)))
+# plt.xticks([0.2, 0.5] + list(np.arange(1, 6, step=1)))
+
+# plt.xticks([0.5] + list(np.arange(1, 8, step=1)))
+plt.xticks([0.5] + list(np.arange(1, 6, step=1)))
 # plt.xlim((0.1, 7.1))
-plt.xlim((0.4, 7.1))
+plt.xlim((0.1, 5.1))
+# plt.xlim((0.4, 7.1))
 # plt.yticks(np.arange(0, 9, step=1))
 plt.yticks(np.arange(0, 19, step=1))
+plt.xlabel("Factor", fontsize=14)
+plt.ylabel("Distance to Boundary", fontsize=14)
 # plt.title("The average perturbation size in different subspaces")
 plt.show()
